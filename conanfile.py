@@ -8,7 +8,7 @@ class ProtobufConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/omicronns/conan-protobuf"
     description = "Protocol Buffers - Google's data interchange format"
-    settings = {"os": ["Linux"], "compiler": None,
+    settings = {"os": ["Linux"], "compiler": ["gcc"],
                 "build_type": None, "arch": None}
 
     def source(self):
@@ -22,14 +22,13 @@ class ProtobufConan(ConanFile):
         self.run("make -j{}".format(tools.cpu_count()), cwd="sources")
 
     def package(self):
-        self.copy("*.h", dst="include", src="sources/src")
-        self.copy("*.a", dst="lib", src="sources/src/.libs", keep_path=False)
-        self.copy("*.so", dst="bin", src="sources/src/.libs", keep_path=False)
-        self.copy("lt-protoc", dst="bin/.libs",
-                  src="sources/src/.libs", keep_path=False)
-        self.copy("protoc", dst="bin/.libs",
-                  src="sources/src/.libs", keep_path=False)
-        self.copy("protoc", dst="bin", src="sources/src", keep_path=False)
+        self.copy("*.h", "include", "sources/src")
+
+        self.copy("*.a", "lib", "sources/src", keep_path=False)
+
+        self.copy("*.so", "bin", "sources/src/.libs", symlinks=True)
+        self.copy("*.so.*", "bin", "sources/src/.libs", symlinks=True)
+        self.copy("*protoc", "bin", "sources/src/.libs")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
